@@ -10,7 +10,7 @@ use SilverStripe\Core\Convert;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use TractorCow\OpenGraph\InspectionTrait;
 use TractorCow\OpenGraph\Interfaces\IOGApplication;
 use TractorCow\OpenGraph\Interfaces\IOpenGraphObjectBuilder;

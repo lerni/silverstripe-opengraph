@@ -4,28 +4,16 @@ namespace TractorCow\OpenGraph\Extensions;
 
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use TractorCow\OpenGraph\Interfaces\IOGApplication;
 use TractorCow\OpenGraph\OpenGraph;
 
-class OpenGraphSiteConfigExtension extends DataExtension implements IOGApplication
+class OpenGraphSiteConfigExtension extends Extension implements IOGApplication
 {
-    public function extraStatics($class = null, $extension = null)
-    {
-        $db = array();
-
-        if (OpenGraph::get_config('application_id') == 'SiteConfig') {
-            $db['OGApplicationID'] = 'Varchar(255)';
-        }
-
-        if (OpenGraph::get_config('admin_id') == 'SiteConfig') {
-            $db['OGAdminID'] = 'Varchar(255)';
-        }
-
-        return array(
-            'db' => $db
-        );
-    }
+    private static $db = [
+        'OGApplicationID' => 'Varchar(255)',
+        'OGAdminID' => 'Varchar(255)',
+    ];
 
     public function updateCMSFields(FieldList $fields)
     {

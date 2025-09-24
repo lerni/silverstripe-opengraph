@@ -6,7 +6,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\i18n\i18n;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBText;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -30,7 +30,7 @@ use TractorCow\OpenGraph\OpenGraph;
  * @author Damian Mooyman
  * @property DataObject|OpenGraphObjectExtension $owner
  */
-class OpenGraphObjectExtension extends DataExtension implements IOGObjectExplicit
+class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
 {
     use Configurable;
     use InspectionTrait;
@@ -113,7 +113,7 @@ class OpenGraphObjectExtension extends DataExtension implements IOGObjectExplici
         return new $class();
     }
 
-    public function MetaTags(&$tags)
+    public function updateMetaTags(&$tags): void
     {
         // Generate tag builder
         $builder = $this->owner->getTagBuilder();

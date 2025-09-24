@@ -1,1 +1,8 @@
 /nbproject/
+.htaccess
+.phpunit.result.cache
+app/
+behat.yml
+composer.lock
+public/
+vendor/
