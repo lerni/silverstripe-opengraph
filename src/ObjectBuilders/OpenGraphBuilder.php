@@ -196,11 +196,6 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
                 $mimeType = $this->getMimeType($value);
             }
 
-            // Append image_src meta tag if not present yet
-            if (preg_match('/^image.*/', $mimeType) && !strstr($tags, 'rel="image_src"')) {
-                $this->appendLink($tags, 'image_src', $value);
-            }
-
             // Build tags
             $this->AppendTag($tags, $namespace, $value);
             if ($https) {
