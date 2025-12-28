@@ -183,24 +183,12 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
 
         // Handle image URL being given
         if (is_string($value)) {
-            // Populate HTTPS url if $value is set to the HTTPS url
-            if (preg_match('/^https:/i', $value) && empty($https)) {
-                $https = $value;
-            }
-
-            // Ensure the main image tag only contains the unsecure url
-            $value = preg_replace('/^https:/i', 'http:', $value);
-
             // Attempt to auto-detect mime type if missing
             if (empty($mimeType)) {
                 $mimeType = $this->getMimeType($value);
             }
 
-            // Build tags
             $this->AppendTag($tags, $namespace, $value);
-            if ($https) {
-                $this->AppendTag($tags, "$namespace:secure_url", $https);
-            }
             $this->AppendTag($tags, "$namespace:type", $mimeType);
             return;
         }
