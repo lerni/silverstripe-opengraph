@@ -170,6 +170,11 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
              */
             $this->AppendTag($tags, "$namespace:width", $value->getWidth());
             $this->AppendTag($tags, "$namespace:height", $value->getHeight());
+
+            // Add alt text for images using Title field
+            if ($namespace === 'og:image' && $value->Title) {
+                $this->AppendTag($tags, "$namespace:alt", $value->Title);
+            }
             return;
         }
 
