@@ -106,29 +106,4 @@ class OpenGraph
     {
         return self::get_config('default_tagbuilder');
     }
-
-    /**
-     * Retrieves the list of all allowed opengraph locales
-     * @return array Associative array of locale to name. E.g. en_UK => 'English (UK)'
-     */
-    public static function get_locales()
-    {
-        return self::get_config('locales');
-    }
-
-    public static function get_default_locale()
-    {
-        return self::get_config('default_locale');
-    }
-
-    /**
-     * Check if a given locale is valid
-     * @param string $locale Locale to test in en_NZ format
-     * @return boolean
-     */
-    public static function is_locale_valid($locale)
-    {
-        $locales = self::get_locales();
-        return isset($locales[$locale]);
-    }
 }

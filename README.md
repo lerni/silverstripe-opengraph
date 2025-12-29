@@ -47,14 +47,12 @@ After: '#opengraphsettings'
 TractorCow\OpenGraph\OpenGraph:
   application_id: 'SiteConfig'
   admin_id: 'SiteConfig'
-  default_locale: 'en_US'
   default_tagbuilder: 'TractorCow\OpenGraph\ObjectBuilders\OpenGraphBuilder'
 
 ```
 
 * Set application_id to either `SiteConfig` (to be set in the CMS) or a literal facebook app id
 * Set admin_id to either `SiteConfig` (to be set in the CMS) or a literal facebook admin_id
-* The default_locale is the literal value to use as the locale tag (if i18n doesn't have a locale set)
 * The default_tagbuilder is the name of the class to use to generate tags (unless a type has one
   specified explicitly). See below under [Adding new types][#adding-new-types] for details.
 

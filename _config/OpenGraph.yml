@@ -4,5 +4,4 @@ Name: opengraphsettings
 TractorCow\OpenGraph\OpenGraph:
   application_id: 'SiteConfig'
   admin_id: 'SiteConfig'
-  default_locale: 'en_US'
   default_tagbuilder: TractorCow\OpenGraph\ObjectBuilders\OpenGraphBuilder

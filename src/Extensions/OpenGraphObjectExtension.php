@@ -221,12 +221,6 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
         // Use current locale
         $locale = i18n::get_locale();
 
-        // Check locale is valid
-        if (OpenGraph::is_locale_valid($locale)) {
-            return $locale;
-        }
-
-        // Return default
-        return OpenGraph::get_default_locale();
+        return $locale;
     }
 }
