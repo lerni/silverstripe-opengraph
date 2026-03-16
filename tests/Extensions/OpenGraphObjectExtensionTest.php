@@ -12,7 +12,7 @@ class OpenGraphObjectExtensionTest extends SapphireTest
 
     protected static $extra_dataobjects = [
         TestPage::class,
-        TestProfile::class
+        TestProfile::class,
     ];
 
     public function testOGNS(): void
@@ -20,7 +20,7 @@ class OpenGraphObjectExtensionTest extends SapphireTest
         $page = $this->objFromFixture(TestPage::class, 'page1');
         $this->assertEquals(
             ' prefix="og: http://ogp.me/ns#  fb: http://www.facebook.com/2008/fbml website: http://ogp.me/ns/website#"',
-            $page->getOGNS()
+            $page->getOGNS(),
         );
     }
 
