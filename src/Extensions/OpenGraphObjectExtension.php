@@ -2,27 +2,20 @@
 
 namespace TractorCow\OpenGraph\Extensions;
 
-use SilverStripe\Control\Director;
-use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\i18n\i18n;
+use SilverStripe\View\SSViewer;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Control\Director;
+use TractorCow\OpenGraph\OpenGraph;
 use SilverStripe\ORM\FieldType\DBText;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\View\SSViewer;
-use TractorCow\OpenGraph\Constants\OGDeterminers;
+use SilverStripe\Core\Config\Configurable;
 use TractorCow\OpenGraph\Constants\OGTypes;
-use TractorCow\OpenGraph\InspectionTrait;
+use TractorCow\OpenGraph\Constants\OGDeterminers;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use TractorCow\OpenGraph\Interfaces\IOpenGraphObjectBuilder;
 use TractorCow\OpenGraph\Interfaces\ObjectTypes\IOGObjectExplicit;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Music\IOGMusic;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\IOGArticle;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\IOGBook;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\IOGProfile;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\IOGWebsite;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\Video\IOGVideo;
-use TractorCow\OpenGraph\OpenGraph;
 
 /**
  * Adds open graph functionality to a page or data object
@@ -33,7 +26,6 @@ use TractorCow\OpenGraph\OpenGraph;
 class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
 {
     use Configurable;
-    use InspectionTrait;
 
     /**
      * The default image to use
@@ -42,50 +34,6 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
      * @var string
      */
     private static $default_image = 'tractorcow/silverstripe-opengraph: images/logo.gif';
-
-    /**
-     * Do not escpae HTML
-     *
-     * @var string
-     */
-    private static $casting = [
-        'OGNS' => 'HTMLFragment',
-    ];
-
-    /**
-     * Property for retrieving the opengraph namespace html tag(s).
-     * This should be inserted into your Page.SS template as: "<html $OGNS>"
-     * @return string The HTML tag to use for the opengraph namespace(s)
-     */
-    public function getOGNS()
-    {
-        // todo : Should custom namespace be injected here, or left up to user code?
-        $ns = ' prefix="og: http://ogp.me/ns#  fb: http://www.facebook.com/2008/fbml';
-        if ($this->implementsType($this->owner, IOGMusic::class)) {
-            $ns .= ' music: http://ogp.me/ns/music#';
-        }
-        if ($this->implementsType($this->owner, IOGVideo::class)) {
-            $ns .= ' video: http://ogp.me/ns/video#';
-        }
-        if ($this->implementsType($this->owner, IOGArticle::class)) {
-            $ns .= ' article: http://ogp.me/ns/article#';
-        }
-        if ($this->implementsType($this->owner, IOGBook::class)) {
-            $ns .= ' book: http://ogp.me/ns/book#';
-        }
-        if ($this->implementsType($this->owner, IOGProfile::class)) {
-            $ns .= ' profile: http://ogp.me/ns/profile#';
-        }
-        if ($this->implementsType($this->owner, IOGWebsite::class)
-            || $this->owner->getOGType() == OGTypes::DEFAULT_TYPE
-        ) {
-            $ns .= ' website: http://ogp.me/ns/website#';
-        }
-        $ns .= '"';
-
-        return $ns;
-    }
-
 
     /**
      * Determines the tag builder to use for this object
@@ -113,7 +61,7 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
         return new $class();
     }
 
-    public function updateMetaTags(&$tags): void
+    public function updateMetaComponents(array &$tags): void
     {
         // Generate tag builder
         $builder = $this->owner->getTagBuilder();
@@ -150,6 +98,7 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
     public function getOGSiteName()
     {
         $config = SiteConfig::current_site_config();
+
         return $config->Title;
     }
 
@@ -173,6 +122,7 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
         if ($image = self::config()->default_image) {
             return Director::absoluteURL(ModuleResourceLoader::resourceURL($image));
         }
+
         return '';
     }
 
@@ -208,6 +158,7 @@ class OpenGraphObjectExtension extends Extension implements IOGObjectExplicit
         if ($contentField instanceof DBText) {
             return $contentField->Summary(100);
         }
+
         return $contentField;
     }
 

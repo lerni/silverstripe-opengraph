@@ -3,20 +3,19 @@
 namespace TractorCow\OpenGraph\ObjectBuilders;
 
 use SilverStripe\Assets\File;
-use SilverStripe\Assets\Storage\DBFile;
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\HTTP;
-use SilverStripe\Core\Convert;
 use SilverStripe\Core\Extensible;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Model\List\SS_List;
+use SilverStripe\Assets\Storage\DBFile;
+use TractorCow\OpenGraph\InspectionTrait;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\Model\List\SS_List;
-use TractorCow\OpenGraph\InspectionTrait;
 use TractorCow\OpenGraph\Interfaces\IOGApplication;
-use TractorCow\OpenGraph\Interfaces\IOpenGraphObjectBuilder;
 use TractorCow\OpenGraph\Interfaces\ObjectTypes\IOGObject;
-use TractorCow\OpenGraph\Interfaces\ObjectTypes\IOGObjectExplicit;
+use TractorCow\OpenGraph\Interfaces\IOpenGraphObjectBuilder;
 use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\IOGProfile;
+use TractorCow\OpenGraph\Interfaces\ObjectTypes\IOGObjectExplicit;
 use TractorCow\OpenGraph\Interfaces\ObjectTypes\Other\Relations\IMediaFile;
 
 /**
@@ -51,6 +50,23 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
         return HTTP::get_mime_type($file);
     }
 
+    /**
+     * Returns a unique array key for a tag name, appending .N suffix for duplicates
+     */
+    protected function getUniqueKey(array &$tags, string $name): string
+    {
+        if (!isset($tags[$name])) {
+            return $name;
+        }
+
+        $i = 1;
+        while (isset($tags["$name.$i"])) {
+            $i++;
+        }
+
+        return "$name.$i";
+    }
+
     public function AppendTag(&$tags, $name, $content)
     {
         if (empty($content)) {
@@ -62,22 +78,29 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
             foreach ($content as $item) {
                 $this->AppendTag($tags, $name, $item);
             }
+
             return null;
         }
 
-        // Handle links to resources (either IOGObject or basic SiteTree
+        // Handle links to resources (either IOGObject or basic SiteTree)
         if ($this->isValueLinkable($content)) {
             $this->AppendTag($tags, $name, $content->AbsoluteLink());
+
             return null;
         }
 
-        // check tag type
+        // Build MetaComponents array entry
         if (is_scalar($content)) {
-            return $tags .= sprintf(
-                "<meta property=\"%s\" content=\"%s\" />\n",
-                Convert::raw2att($name),
-                Convert::raw2att($content)
-            );
+            $key = $this->getUniqueKey($tags, $name);
+            $tags[$key] = [
+                'tag' => 'meta',
+                'attributes' => [
+                    'property' => $name,
+                    'content' => (string) $content,
+                ],
+            ];
+
+            return null;
         }
 
         trigger_error('Invalid tag type: ' . gettype($content), E_USER_ERROR);
@@ -99,8 +122,8 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
     }
 
     /**
-     * Generates a <link /> element and appends it to a set of header tags
-     * @param string $tags The current tag string to append these to
+     * Appends a <link /> element to a MetaComponents array
+     * @param array  $tags The MetaComponents array to add the tag to
      * @param string $rel  The rel attribute value
      * @param string $link URL to the linked resource
      * @param string $type Mime type of the resource, if known
@@ -111,14 +134,21 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
             return;
         }
 
-        $tags .= sprintf(
-            "<link rel=\"%s\" href=\"%s\" type=\"%s\" />\n",
-            Convert::raw2att($rel),
-            Convert::raw2att($link),
-            $type
-                ? $type
-                : $this->getMimeType($link)
-        );
+        $key = $this->getUniqueKey($tags, "link:$rel");
+        $attributes = [
+            'rel' => $rel,
+            'href' => $link,
+        ];
+
+        $mimeType = $type ?: $this->getMimeType($link);
+        if ($mimeType) {
+            $attributes['type'] = $mimeType;
+        }
+
+        $tags[$key] = [
+            'tag' => 'link',
+            'attributes' => $attributes,
+        ];
     }
 
     /**
@@ -153,6 +183,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
             foreach ($value as $file) {
                 $this->appendMediaMetaTags($tags, $namespace, $file, null, $mimeType);
             }
+
             return;
         }
 
@@ -175,6 +206,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
             if ($namespace === 'og:image' && $value->Title) {
                 $this->AppendTag($tags, "$namespace:alt", $value->Title);
             }
+
             return;
         }
 
@@ -183,6 +215,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
             $this->appendMediaMetaTags($tags, $namespace, $value->getAbsoluteURL(), $value->getSecureURL(), $value->getType());
             $this->AppendTag($tags, "$namespace:width", $value->getWidth());
             $this->AppendTag($tags, "$namespace:height", $value->getHeight());
+
             return;
         }
 
@@ -195,6 +228,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
 
             $this->AppendTag($tags, $namespace, $value);
             $this->AppendTag($tags, "$namespace:type", $mimeType);
+
             return;
         }
 
@@ -222,7 +256,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
     }
 
     /**
-     * @param string            $tags
+     * @param array             $tags
      * @param IOGObjectExplicit $object
      */
     protected function appendDefaultMetaTags(&$tags, $object)
@@ -247,7 +281,7 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
     }
 
     /**
-     * @param string         $tags
+     * @param array          $tags
      * @param IOGApplication $config
      */
     protected function appendApplicationMetaTags(&$tags, $config)
