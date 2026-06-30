@@ -47,7 +47,10 @@ class OpenGraphBuilder implements IOpenGraphObjectBuilder
      */
     protected function getMimeType($file)
     {
-        return HTTP::get_mime_type($file);
+        // Strip query string / fragment so extension-based detection works for cache-busted URLs (e.g. icon-512.png?m=123)
+        $path = parse_url((string) $file, PHP_URL_PATH) ?: $file;
+
+        return HTTP::get_mime_type($path);
     }
 
     /**
